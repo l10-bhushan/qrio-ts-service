@@ -10,6 +10,7 @@
     "target": "es2023",
     "esModuleInterop": true,
     "types": [],
+    "typeRoots": ["./src/types", "./node_modules/@types"],
 
     // Other Outputs
     "sourceMap": true,

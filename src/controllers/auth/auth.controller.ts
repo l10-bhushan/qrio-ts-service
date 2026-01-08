@@ -2,7 +2,6 @@ import bcrypt from "bcrypt";
 import type { Request, Response } from "express";
 import { prisma } from "../../config/db.ts";
 import type { UserLogin, UserSignup } from "../../types/user.model.ts";
-import { error } from "node:console";
 import { generateJWTToken } from "../../utils/helper.ts";
 
 const handleUserRegisteration = async (req: Request, res: Response) => {
@@ -88,7 +87,6 @@ const handleUserLogin = async (req: Request, res: Response) => {
     generateJWTToken(emailExists.id, res);
     return res.status(200).json({
       status: "success",
-      data: emailExists,
     });
   } else {
     return res.status(400).json({
@@ -97,7 +95,7 @@ const handleUserLogin = async (req: Request, res: Response) => {
   }
 };
 
-const handleUserLogout = (req: Request, res: Response) => {
+const handleUserLogout = (_req: Request, res: Response) => {
   res.cookie("access_token", "", {
     httpOnly: true,
     expires: new Date(0),

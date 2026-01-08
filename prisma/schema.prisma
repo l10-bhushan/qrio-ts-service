@@ -15,10 +15,22 @@ datasource db {
 
 // User Schema
 model User {
-  id        String   @id @default(uuid())
+  id        String     @id @default(uuid())
   firstname String
   lastname  String
-  email     String   @unique
+  email     String     @unique
   password  String
-  createdAt DateTime @default(now())
+  createdAt DateTime   @default(now())
+  shortURLs ShortURL[]
+}
+
+model ShortURL {
+  id         String   @id @default(uuid())
+  longurl    String   @unique
+  shortcode  String
+  createdBy  String
+  noOfVisits BigInt
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [createdBy], references: [id], onDelete: Cascade)
 }
