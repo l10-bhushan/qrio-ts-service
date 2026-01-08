@@ -2,6 +2,8 @@ import bcrypt from "bcrypt";
 import type { Request, Response } from "express";
 import { prisma } from "../../config/db.ts";
 import type { UserLogin, UserSignup } from "../../types/user.model.ts";
+import { error } from "node:console";
+import { generateJWTToken } from "../../utils/helper.ts";
 
 const handleUserRegisteration = async (req: Request, res: Response) => {
   // Getting the user from request body
@@ -38,6 +40,7 @@ const handleUserRegisteration = async (req: Request, res: Response) => {
         password: hashedPassword,
       },
     });
+    generateJWTToken(createdUser.id, res);
     return res.status(201).json({
       status: "success",
       data: {
@@ -56,12 +59,17 @@ const handleUserLogin = async (req: Request, res: Response) => {
   // Getting the user from request body
   const user: UserLogin = req.body;
 
+  let emailExists;
   // Checking if we have an account with the provided email
-  const emailExists = await prisma.user.findUnique({
-    where: {
-      email: user.email,
-    },
-  });
+  try {
+    emailExists = await prisma.user.findUnique({
+      where: {
+        email: user.email,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({ error: "Internal server error" });
+  }
 
   // If account is not present, return error message
   if (!emailExists) {
@@ -77,6 +85,7 @@ const handleUserLogin = async (req: Request, res: Response) => {
   );
 
   if (verification) {
+    generateJWTToken(emailExists.id, res);
     return res.status(200).json({
       status: "success",
       data: emailExists,
@@ -88,6 +97,15 @@ const handleUserLogin = async (req: Request, res: Response) => {
   }
 };
 
-const handleUserLogout = (req: Request, res: Response) => {};
+const handleUserLogout = (req: Request, res: Response) => {
+  res.cookie("access_token", "", {
+    httpOnly: true,
+    expires: new Date(0),
+  });
+  res.status(200).json({
+    status: "success",
+    message: "You have successfully logged out",
+  });
+};
 
 export { handleUserRegisteration, handleUserLogin, handleUserLogout };
