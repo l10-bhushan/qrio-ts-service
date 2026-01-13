@@ -29,7 +29,7 @@ model ShortURL {
   longurl    String   @unique
   shortcode  String
   createdBy  String
-  noOfVisits BigInt
+  noOfVisits Int
   createdAt  DateTime @default(now())
 
   user User @relation(fields: [createdBy], references: [id], onDelete: Cascade)

@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 import type { SignOptions } from "jsonwebtoken";
 import type { Response } from "express";
+const chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_EXPIRES_IN: any = process.env.JWT_EXPIRES_IN || "7d";
@@ -20,4 +21,13 @@ const generateJWTToken = (userId: string, res: Response) => {
   });
 };
 
-export { generateJWTToken };
+function encodeBase62(num: number): string {
+  let result = "";
+  while (num > 0) {
+    result = chars[num % 62] + result;
+    num = Math.floor(num / 62);
+  }
+  return result;
+}
+
+export { generateJWTToken, encodeBase62 };
