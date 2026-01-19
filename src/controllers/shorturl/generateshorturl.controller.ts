@@ -2,15 +2,34 @@ import { prisma } from "../../config/db.ts";
 import type { Request, Response } from "express";
 import { encodeBase62 } from "../../utils/helper.ts";
 
-const fetchAllShortURLs = (req: Request, res: Response) => {
-  const userId = req.user?.userId;
+const fetchAllShortURLs = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.userId;
 
-  res.status(200).json({
-    status: "success",
-    data: {
-      userId,
-    },
-  });
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated." });
+    }
+
+    const allShortUrls = await prisma.shortURL.findMany({
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+
+    res.status(200).json({
+      status: "success",
+      data: {
+        allShortUrls,
+      },
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error",
+    });
+  }
 };
 
 const redirectURL = (_req: Request, res: Response) => {};
@@ -101,8 +120,28 @@ const generateShortURL = async (req: Request, res: Response) => {
   }
 };
 
-const deleteShortURL = (_req: Request, _res: Response) => {
-  console.log("Delete short URL");
+const deleteShortURL = async (req: Request, res: Response) => {
+  try {
+    const { urlId } = req.body;
+
+    const success = await prisma.shortURL.delete({
+      where: {
+        id: urlId,
+      },
+    });
+
+    if (success) {
+      return res.status(200).json({
+        status: "success",
+        message: "URL deleted successfully !!",
+      });
+    }
+  } catch (err) {
+    return res.status(500).json({
+      status: "error",
+      message: "Internal server error: URLId does not exist",
+    });
+  }
 };
 
 const updateShortURL = (_req: Request, _res: Response) => {

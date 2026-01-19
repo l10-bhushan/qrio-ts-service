@@ -5,6 +5,7 @@ import { connectDB, disconnectDB } from "./config/db.ts";
 import healthRoute from "./routes/health.routes.ts";
 import authRoute from "./routes/auth/auth.routes.ts";
 import shortURLRoute from "./routes/shorturl/generateshorturl.routes.ts";
+import { redirectHandler } from "./controllers/redirect-controller.ts";
 
 const app = express();
 const PORT = process.env.PORT!;
@@ -14,6 +15,7 @@ app.use(cookieParser());
 app.use("/health", healthRoute);
 app.use("/auth", authRoute);
 app.use("/shorturl", shortURLRoute);
+app.get("/:shortCode", redirectHandler);
 
 connectDB();
 
